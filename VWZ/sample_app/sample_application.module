@@ -6,7 +6,7 @@
 function sample_application_menu() {
   $items['admin/structure/flags/sample_application'] = array(
     'title' => 'Sample Application Interface',
-    'description' => 'Find and manage applications.',
+    'description' => 'Find and manage proposals.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sample_application_form'),
     //'access callback' =>  'sample_application_permission',
