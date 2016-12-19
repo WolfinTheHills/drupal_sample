@@ -1,0 +1,5 @@
+name = Sample Application
+description = Sample entities that require admin approval. 
+dependencies[] = flag (3.x)
+core = 7.x 
+package = Flags

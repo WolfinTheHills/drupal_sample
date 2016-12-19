@@ -1,0 +1,171 @@
+
+<?php
+/**
+* Implements hook_menu
+*/
+function sample_application_menu() {
+  $items['admin/structure/flags/sample_application'] = array(
+    'title' => 'Sample Application Interface',
+    'description' => 'Find and manage applications.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sample_application_form'),
+    //'access callback' =>  'sample_application_permission',
+    'access arguments' => array('administer sample applications'),
+    'weight' => 0,
+    'file' => 'sample_application.admin.inc'
+  );
+  return $items;
+}
+
+/**
+* Implements hook_permission().
+*/
+function sample_application_permission() {
+  return array(
+    'administer sample applications' => array(
+        'title' => t('Administer sample applications'),
+        'description' => t('Approve and deny sample applications.'),
+    ),
+
+  );
+}
+
+
+/**
+*	Implements hook_flag_flag
+*/
+function sample_application_flag_flag($flag, $entity_id, $account, $flagging ){
+	dsm($flagging);
+	if ($flag->name == 'sample_application'){
+		$result = db_insert('sample_application')
+		  ->fields(array (
+			'flagging_id' => $flagging->flagging_id,
+			'status' => 0))
+		  ->execute();
+    }
+
+
+
+
+}
+/**
+ * Implements hook_flag_unflag
+ */
+function sample_application_flag_unflag($flag, $entity_id, $account, $flagging) {
+	if ($flag->name == 'sample_application') {
+		$deleted = db_delete('sample_application')
+
+		->condition('flagging_id', $flagging->flagging_id)
+		->execute();
+	}
+}
+/**
+ * Implements hook_form_FORM_ID_alter
+ */
+function sample_application_form_flag_form_alter(&$form, &$form_state) {
+  dsm($form);
+  if($form['#flag_name'] == 'sample_application') {
+    $form['sample_application'] = array(
+        '#type' => 'fieldset',
+        '#title' => 'Sample Application Settings',
+        '#collapsible' => TRUE,
+        'sample_application_approved_action' => array(
+            '#type' => 'checkbox',
+            '#title' => 'Disable Link',
+            '#default_value' => $form['#flag']->sample_application_approved_action,
+            '#description' => 'Disable link for other users when applicaion is approved',
+           ),
+            'sample_application_maintained_message' => array(
+            '#type' => 'textfield',
+            '#title' => 'Maintained message',
+            '#default_value' => $form['#flag']->sample_application_maintained_message,
+            '#description' => 'Message to display if the node has an application approved for it and if the link is disabled.'
+
+        ),
+
+
+    );
+  }
+}
+/**
+ *Implements hook_flag_options_alter
+ */
+function sample_application_flag_options_alter(&$options, $flag) {
+  if ($flag->name == 'sample_application') {
+  $options['sample_application_approved_action'] = 0;
+  $options['sample_application_maintained_message'] = '';
+  }
+
+
+}
+//function sample_application_form_flag_form_alter_submit ($form, $form_state) {
+ // variable_set('sample_application_approved_action', $form_state['values']['sample_application_approved_action']);
+  // variable_set('sample_application_maintained_message', $form_state['values']['sample_application_maintained_message']);
+
+//}
+/**
+ * Implements Template  Preprocess can be made more efficient.
+ */
+function sample_application_preprocess_flag(&$vars) {
+  if($vars['flag']->name == 'sample_application' && $vars['flag']->sample_application_approved_action == 1 && sample_application_application_approved($vars['entity_id'])){
+    $vars['link_href'] = '';
+    check_plain($vars['flag']->sample_application_maintained_message);
+    }
+  }
+
+/**
+ * Get the status of flag given the content id
+ * @param entity_id id of the entity we are checking
+ * @return boolean whether the aplication has been approved
+ */
+  function sample_application_application_approved($entity_id) {
+    $sql = "SELECT fa.status FROM {sample_application} fa LEFT JOIN {flagging} f ON fa.flagging_id = f.flagging_id WHERE f.entity_id";
+    $conditions = array(':eid' => $entity_id, ':status' => 1);
+    if (db_query($sql, $conditions)->fetchField()) {
+      return TRUE;
+    }else {
+      return FALSE;
+    }
+  }
+/**
+ * Implements hook_flag_Default_flags
+ */
+
+ function sample_application_flag_default_flags() {
+$flags = array();
+// Exported flag: "Sample Application".
+$flags['sample_application'] = array (
+  'entity_type' => 'node',
+  'title' => 'Sample Application',
+  'global' => '0',
+  'types' =>
+  array (
+  ),
+  'flag_short' => 'Begin Story',
+  'flag_long' => 'Start your story',
+  'flag_message' => 'It\'s Adventure Time! ',
+  'unflag_short' => 'Pause your story',
+  'unflag_long' => 'Pause your story. ',
+  'unflag_message' => 'Your story has been paused. ',
+  'unflag_denied_text' => '',
+  'link_type' => 'toggle',
+  'weight' => 0,
+  'show_in_links' =>
+  array (
+    'full' => 'full',
+    'teaser' => 'teaser',
+    'rss' => 0,
+    'search_index' => 0,
+    'search_result' => 0,
+  ),
+  'show_as_field' => 1,
+  'show_on_form' => 0,
+  'access_author' => '',
+  'show_contextual_link' => 0,
+  'i18n' => 0,
+  'api_version' => 3,
+);
+return $flags;
+
+
+ }
