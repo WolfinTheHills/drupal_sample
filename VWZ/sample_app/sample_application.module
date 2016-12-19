@@ -16,7 +16,6 @@ function sample_application_menu() {
   );
   return $items;
 }
-
 /**
 * Implements hook_permission().
 */
@@ -26,11 +25,8 @@ function sample_application_permission() {
         'title' => t('Administer sample applications'),
         'description' => t('Approve and deny sample applications.'),
     ),
-
   );
 }
-
-
 /**
 *	Implements hook_flag_flag
 */
@@ -42,11 +38,7 @@ function sample_application_flag_flag($flag, $entity_id, $account, $flagging ){
 			'flagging_id' => $flagging->flagging_id,
 			'status' => 0))
 		  ->execute();
-    }
-
-
-
-
+	}
 }
 /**
  * Implements hook_flag_unflag
@@ -54,8 +46,7 @@ function sample_application_flag_flag($flag, $entity_id, $account, $flagging ){
 function sample_application_flag_unflag($flag, $entity_id, $account, $flagging) {
 	if ($flag->name == 'sample_application') {
 		$deleted = db_delete('sample_application')
-
-		->condition('flagging_id', $flagging->flagging_id)
+        ->condition('flagging_id', $flagging->flagging_id)
 		->execute();
 	}
 }
@@ -64,6 +55,7 @@ function sample_application_flag_unflag($flag, $entity_id, $account, $flagging) 
  */
 function sample_application_form_flag_form_alter(&$form, &$form_state) {
   dsm($form);
+
   if($form['#flag_name'] == 'sample_application') {
     $form['sample_application'] = array(
         '#type' => 'fieldset',
@@ -80,36 +72,32 @@ function sample_application_form_flag_form_alter(&$form, &$form_state) {
             '#title' => 'Maintained message',
             '#default_value' => $form['#flag']->sample_application_maintained_message,
             '#description' => 'Message to display if the node has an application approved for it and if the link is disabled.'
+            ),
+       );
 
-        ),
-
-
-    );
   }
 }
+
+
 /**
  *Implements hook_flag_options_alter
- */
+*/
 function sample_application_flag_options_alter(&$options, $flag) {
   if ($flag->name == 'sample_application') {
   $options['sample_application_approved_action'] = 0;
   $options['sample_application_maintained_message'] = '';
   }
-
-
 }
-//function sample_application_form_flag_form_alter_submit ($form, $form_state) {
- // variable_set('sample_application_approved_action', $form_state['values']['sample_application_approved_action']);
-  // variable_set('sample_application_maintained_message', $form_state['values']['sample_application_maintained_message']);
 
-//}
+
+
 /**
  * Implements Template  Preprocess can be made more efficient.
- */
+*/
 function sample_application_preprocess_flag(&$vars) {
   if($vars['flag']->name == 'sample_application' && $vars['flag']->sample_application_approved_action == 1 && sample_application_application_approved($vars['entity_id'])){
     $vars['link_href'] = '';
-    check_plain($vars['flag']->sample_application_maintained_message);
+    $vars['link_text'] = $vars['flag']->sample_application_maintained_message;
     }
   }
 
@@ -141,12 +129,12 @@ $flags['sample_application'] = array (
   'types' =>
   array (
   ),
-  'flag_short' => 'Begin Story',
-  'flag_long' => 'Start your story',
-  'flag_message' => 'It\'s Adventure Time! ',
-  'unflag_short' => 'Pause your story',
-  'unflag_long' => 'Pause your story. ',
-  'unflag_message' => 'Your story has been paused. ',
+  'flag_short' => 'Submit Proposal',
+  'flag_long' => 'Submit Your Propsal',
+  'flag_message' => 'Thank you! Your proposal has been submitted',
+  'unflag_short' => 'Rescind Proposal',
+  'unflag_long' => 'Rescind Your Proposal. ',
+  'unflag_message' => 'Your proposal has been rescinded. ',
   'unflag_denied_text' => '',
   'link_type' => 'toggle',
   'weight' => 0,
